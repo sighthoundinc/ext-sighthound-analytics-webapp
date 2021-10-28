@@ -1,0 +1,186 @@
+/* Base styling */
+html, body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  font-family: lexend;
+  font-size: 16px;
+  background-color: white; /* rgba(38, 41, 66, .03); */
+  height: 100%;
+  color:rgb(38, 41, 66);
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: bolder;
+}
+
+p {
+  font-size: 0.9rem;
+  font-weight: lighter;
+}
+
+label {
+  font-size: .8rem;
+}
+
+/* Header styling */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+}
+
+nav img {
+  width: auto;
+  height: 45px;
+  padding: 15px 25px 15px 25px;
+}
+
+nav button {
+  padding: 10px 20px;
+  margin-right: 25px;
+}
+
+nav input:hover, nav label:hover, nav button:hover {
+  cursor: pointer;
+}
+
+/* Selected image styling */
+.selectedContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 5px;
+  position: absolute;
+  overflow-y: scroll;
+  height: calc(100% - 450px);
+  left: 0;
+  right: 0;
+}
+
+.selectedImage {
+  width: auto;
+  max-width: 100%;
+  max-height: 500px;
+  padding: 25px 0 25px 25px;
+  background-color: #fff;
+  flex-shrink: 2;
+}
+
+.selectedDetails {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  background-color: #fff;
+}
+
+.selectedDetails img {
+  width: 300px;
+  height: 150px;
+  object-fit: none;
+}
+
+/* Image grid styling */
+
+.imageGrid {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  height: 345px;
+  overflow: scroll;
+  background-color: #fff;
+}
+
+.imageGrid p {
+  z-index: 1;
+  position: relative;
+  color: #fff;
+  left: 10px;
+  background:rgba(38, 41, 66, .8);
+  padding: 5px;
+  width: 75px;
+}
+
+.gridImage {
+  width: 163px;
+  height: 163px;
+  object-fit: cover;
+  margin: -42px 0 5px 10px;
+}
+
+.personImage {
+  width: 163px;
+  height: 163px;
+  object-fit: cover;
+  margin: 0 0 0 10px;
+}
+
+.selectedGridImage {
+  opacity: .6;
+}
+
+.gridImage:hover {
+  cursor: pointer;
+}
+
+#getFileButton {
+  display: initial;
+  border: 0px;
+  border-radius: 5px;
+  padding: 5px;
+  color: white;
+  background-color: rgb(0, 102, 255);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(38, 41, 66, .5);;
+  box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+}
+
+/* Responsive media queries */
+@media only screen and (max-width: 1250px){
+  .selectedContainer {
+    flex-direction: column;
+    background-color: #fff;
+    margin: 2px 0;
+    padding-bottom: 0;
+  }
+  .selectedImage {
+    margin: auto;
+    padding: 0;
+    max-height: 350px;
+  }
+  .selectedDetails {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: auto;
+  }
+  .selectedDetails img {
+    width: 200px;
+    height: 100px;
+  }
+  .selectedText {
+    flex: 1;
+    height: 40%;
+    margin-left: auto;
+    margin-right: auto;
+    /* text-align: center; */
+  }
+
+  .selectedText p {
+    margin-top: 0px;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+}
