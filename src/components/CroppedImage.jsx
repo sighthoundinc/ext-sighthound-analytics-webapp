@@ -25,7 +25,8 @@ export default class CroppedImage  extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.src !== prevProps.src) {
+        // Guard against null src.
+        if (this.props.src && this.props.src !== prevProps.src) {
             this.updateImage();
         }
         if (JSON.stringify(this.props.region) !== JSON.stringify(prevProps.region) && (this.props.type === "lp")) {
@@ -81,7 +82,11 @@ export default class CroppedImage  extends React.Component {
         //     " destH=", destHeight);
 
         // draw cropped image
-        context.drawImage(this.state.imageObj, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight);
+        try {
+            context.drawImage(this.state.imageObj, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight);
+        } catch (err) {
+            console.log("CroppedImage - exception - err=", err?.message);
+        }
     }
 
     // Fit a large image onto a smaller canvas.

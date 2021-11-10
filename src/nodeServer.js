@@ -1,12 +1,19 @@
 //
 // Helper functions to talk to the node server to get images and watchlists.
 //
-import {storeWatchlistToLocalStorage} from "./watchlistHandler";
+import {getLSServerAddress, getLSServerToggle, setLSWatchlist} from "./watchlistHandler";
 
 // Given an image filename, tell the node server to return it.
-export async function getImageDataFromNodeServer(filename) {
+export async function getImageFromNodeServer(filename) {
     try {
-        const nodeDemoServerUrl = process.env.REACT_APP_API_HOST ?? "/api";
+        const serverAddressControlInUse = getLSServerToggle();
+        let nodeDemoServerUrl = process.env.REACT_APP_API_HOST ?? "http://localhost:4000";
+        if (serverAddressControlInUse) {
+            const serverAddress = getLSServerAddress();
+            if (serverAddress) {
+                nodeDemoServerUrl = "http://" + serverAddress + ":4000";
+            }
+        }
 
         const rsp = await fetch(`${nodeDemoServerUrl}/image/${filename}`);
         if (rsp.status === 200) {
@@ -16,7 +23,7 @@ export async function getImageDataFromNodeServer(filename) {
         }
         console.log("ns - ERROR getting image data! rsp.status=", rsp.status);
     } catch (err) {
-        console.log("getImage - EXCEPTION - err=", err);
+        console.log("getImageFromNodeServer - EXCEPTION - err=", err);
     }
     return null;
 }
@@ -25,7 +32,7 @@ export async function getImageDataFromNodeServer(filename) {
 // to open it and serve us back the json.
 // Note - for this to work, we need to have a Node server with a
 // REST endpoint 'getWatchlist'. This work is TBD.
-export async function getWatchlistDataFromNodeServer(fileObj, filepath) {
+export async function getWatchlistFromNodeServer(fileObj, filepath) {
     try {
         const formdata = new FormData();
         formdata.append("imagefile", fileObj, filepath);
@@ -35,18 +42,17 @@ export async function getWatchlistDataFromNodeServer(fileObj, filepath) {
             // headers: {"Content-Type": "multipart/form-data"}, // don't include this!
             method: "POST",
         };
-        const nodeDemoServerUrl = process.env.REACT_APP_API_HOST ?? "/api";
+        const configServerUrl = process.env.REACT_APP_CONFIG_HOST ?? "http://localhost:4001";
 
-        const rsp = await fetch(`${nodeDemoServerUrl}/getWatchlist`, req);
+        const rsp = await fetch(`${configServerUrl}/getWatchlist`, req);
         if (rsp.status === 200) {
             const jsonResults = await rsp.json();
-            console.log("ns - got data from node server on watchlist=", jsonResults);
-            storeWatchlistToLocalStorage(jsonResults, filepath);
+            setLSWatchlist(jsonResults);
             return jsonResults;
         }
         console.log("ns - ERROR getting watchlist! rsp.status=", rsp.status);
     } catch (err) {
-        console.log("getImage - EXCEPTION - err=", err);
+        console.log("getWatchlistFromNodeServer - EXCEPTION - err=", err);
     }
     return {};
 }

@@ -6,13 +6,105 @@
 
 import '../App.css';
 import React from 'react';
-import {getWatchlistFilename} from "../watchlistHandler";
+import {
+    getLSWatchlistFilename,
+    setLSWatchlistFilename,
+} from "../watchlistHandler";
 
-function Header({watchlistAvailable, toggleUseWatchlist, setWatchListInParent, clearWLData, showWLUI}){
+function Header({
+    toggleUseWatchlist,
+    toggleUseServer,
+    setWatchListInParent,
+    setServerAddress,
+    serverAddress,
+    clearWLData,
+    watchlistChecked,
+    showIpUI,
+    showWLUI,
+    ipServerChecked,
+    showResultsNow,
+    connected,
+}){
 
+    return(
+        <div>
+            <nav>
+                <img src="/Sighthound_Logo_Horizontal_Dark.png" alt="Sighthound Logo" />
+                { showIpUI &&
+                    <div style={{width: 140}}>
+                        <div style={{display: "flex", flexDirection: "column", alignItems: "left"}}>
+                            <div>
+                            <label htmlFor="server" style={{height: 18, width: 89}}>
+                                Specify Server
+                            </label>
+                            <input
+                                id="server"
+                                checked={ipServerChecked}
+                                type="checkbox"
+                                style={{marginRight: 7}}
+                                onChange={() => toggleUseServer()}
+                            />
+                            { ipServerChecked &&
+                                <div>
+                                    <input
+                                        placeholder="Server Address"
+                                        id="server"
+                                        type="text"
+                                        value={serverAddress}
+                                        onChange={(val) => setServerAddress(val)}/>
+                                </div>
+                            }
+                            </div>
+                            <div>
+                                <button className="resultsButton" onClick={showResultsNow}>
+                                    Show Results
+                                </button>
+                            </div>
+                            <div>
+                                <p style={{margin: "5px 0 0 0", fontSize: "0.8rem"}}>
+                                    Connected:
+                                    {connected ? 
+                                        <span className="greenDot"></span>
+                                    :
+                                        <span className="redDot"></span>
+                                    }
+                                    
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                { showWLUI &&
+                    <div style={{width: 260}}>
+                        <div style={{display: "flex", alignItems: "center"}}>
+                            {/* Need to disable this checkbox if no watchlist is uploaded */}
+                            <label htmlFor="watchlist" style={{height: 18}}>
+                                Use Watchlist
+                            </label>
+                            <input
+                                id="watchlist"
+                                checked={watchlistChecked}
+                                type="checkbox"
+                                onChange={() => toggleUseWatchlist()}
+                            />
+                            { watchlistChecked && renderWatchlistUI(setWatchListInParent, clearWLData) }
+                        </div>
+                    </div>
+                }
+
+            </nav>
+        </div>
+    )
+}
+
+function renderWatchlistUI(
+    setWatchListInParent,
+    clearWLData
+) {
     const fileInput = React.createRef();
     const buttonInput = React.createRef();
-    const storedWatchfileName = getWatchlistFilename();
+    const storedWatchfileName = getLSWatchlistFilename();
     const buttonText = storedWatchfileName || "Select File...";
 
     const handleWatchList = async (fileObj, filepath) => {
@@ -20,66 +112,48 @@ function Header({watchlistAvailable, toggleUseWatchlist, setWatchListInParent, c
         setWatchListInParent(fileObj, filename);
     }
 
-    return(
-        <div>
-            <nav>
-                <img src="/Sighthound_Logo_Horizontal_Dark.png" alt="Sighthound Logo" />
-                { showWLUI &&
-                    <div>
-                    <div>
-                        <div>
-                            {/* Need to disable this checkbox if no watchlist is uploaded */}
-                            <label 
-                                style={!watchlistAvailable ? {color: "rgba(38, 41, 66, .4)"} : null}
-                                htmlFor="watchlist"
-                            >
-                                Use watchlist
-                            </label>
-                            <input disabled={!watchlistAvailable} id="watchlist" type="checkbox" onChange={() => toggleUseWatchlist()}/>
-
-                        </div>
-                    </div>
-                    {/* We will need to store this file somewhere, then access in App scratchpad: value={watchlistFile} */}
-                    <button
-                        id="getFileButton"
-                        ref={buttonInput}
-                        onClick={(e) => { e.preventDefault(); fileInput.current.click(); }}
-                    >
-                        {buttonText}
-                    </button>
-                    <input
-                        type="file"
-                        accept=".csv"
-                        onChange={(e) => {
-                            if (e.target.files) {
-                                console.log("header - got files from user input=", e.target.files);
-                                const fileObj = e.target.files[0]; // just get first
-                                if (e.target.value) {
-                                    // Get rid of path component to name, just take letters past the last slash.
-                                    buttonInput.current.innerText = e.target.value.substring(e.target.value.lastIndexOf("\\") + 1); 
-                                    handleWatchList(fileObj, e.target.value)
-                                }
-                            }
-                        }}
-                        style={{display: "none"}}
-                        ref={fileInput} 
-                    />
-                    <button
-                        id="getFileButton"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            clearWLData();
-                            buttonInput.current.innerText = "Select File...";
-                            fileInput.current.value = "";
-                        }}
-                    >
-                        Clear Watchlist Data
-                    </button>
-                </div>
-            }
-            </nav>
+    return (
+        <div style={{flex: 1}}>
+            {/* We will need to store this file somewhere, then access in App scratchpad: value={watchlistFile} */}
+            <button
+                id="getFileButton"
+                style={{marginBottom: 4}}
+                ref={buttonInput}
+                onClick={(e) => { e.preventDefault(); fileInput.current.click(); }}
+            >
+                {buttonText}
+            </button>
+            <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                    if (e.target.files) {
+                        const fileObj = e.target.files[0]; // just get first
+                        if (e.target.value) {
+                            // Get rid of path component to name, just take letters past the last slash.
+                            buttonInput.current.innerText = e.target.value.substring(e.target.value.lastIndexOf("\\") + 1); 
+                            handleWatchList(fileObj, e.target.value);
+                            setLSWatchlistFilename(buttonInput.current.innerText);
+                        }
+                    }
+                }}
+                style={{display: "none", marginBottom: 1}}
+                ref={fileInput} 
+            />
+            <button
+                style={{marginRight: 5}}
+                id="getFileButton"
+                onClick={(e) => {
+                    e.preventDefault();
+                    clearWLData();
+                    buttonInput.current.innerText = "Select File...";
+                    fileInput.current.value = "";
+                }}
+            >
+                Clear Watchlist Data
+            </button>
         </div>
-    )
+    );
 }
 
 export default Header;

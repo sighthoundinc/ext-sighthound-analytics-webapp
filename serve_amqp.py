@@ -41,7 +41,7 @@ exchange_promise = producer.exchange_declare(exchange='alprdemo_exc', type='fano
 producer.wait(exchange_promise)
 
 count = 0
-interMsgTimeout = 0.0
+interMsgTimeout = 2.0
 
 # Send message data in a loop, once every 10 seconds.
 while True:
@@ -53,6 +53,7 @@ while True:
     vehType = randomType()
     frameId = "7fba8f8a-ea78-4f13-ae8d-f762265da347" if count % 2 else "12345678-94d3-4c21-ac5e-ce5572eb1118"
     count += 1
+    time.sleep(.2)
 
     message1 = {
         "apiVersion" : {
@@ -64,8 +65,8 @@ while True:
             "vehicles" : {
                 carId : {
                     "detectionScore" : 0.9999,
-                    "bestDetectionTimestamp" : ts + 2000,
-                    "firstFrameTimestamp" : ts,
+                    "bestDetectionTimestamp" : ts - 200,
+                    "firstFrameTimestamp" : ts - 100,
                     "box" : {
                         "height" : 1025,
                         "width" : 1410,
@@ -117,8 +118,8 @@ while True:
             "licensePlates" : {
                 lpId : {
                     "detectionScore" : 0.9875,
-                    "bestDetectionTimestamp" : ts + 6000,
-                    "firstFrameTimestamp" : ts + 4000,
+                    "bestDetectionTimestamp" : ts - 100,
+                    "firstFrameTimestamp" : ts - 200,
                     "box" : {
                         "height" : 100,
                         "width" : 360,
@@ -171,8 +172,8 @@ while True:
             "people" : {
                 personId : {
                     "detectionScore" : 0.9975,
-                    "bestDetectionTimestamp" : ts + 6000,
-                    "firstFrameTimestamp" : ts + 4000,
+                    "bestDetectionTimestamp" : ts - 400,
+                    "firstFrameTimestamp" : ts - 300,
                     "box" : {
                         "height" : 360,
                         "width" : 360,
@@ -200,13 +201,13 @@ while True:
     {"licensePlates": {"stream2-lp-40937": {"attributes": {"lpString": 
     {"value": "KKU3381", "attributeScore": 1, "detectionScore": 0.48, "updated": True}, "lpRegion": 
     {"value": "NewYork", "attributeScore": 0.72, "detectionScore": 0.48, "updated": True}}, 
-    "firstFrameTimestamp": 1634231914700, "bestDetectionTimestamp": 1634231914700, "box": 
+    "firstFrameTimestamp": ts - 1000, "bestDetectionTimestamp": ts - 1100, "box": 
     {"height": 35, "width": 67, "x": 208, "y": 393}, "detectionScore": 0.48, "updated": False, 
     "links": [{"metaClass": "vehicles", "id": "stream2-car-186331"}]}}, "vehicles": 
     {"stream2-car-186331": {"attributes": {"vehicleType": {"value": "toyota tundra", "attributeScore": 0.83, 
     "detectionScore": 0.83, "updated": True}, "color": {"value": "green", "attributeScore": 1.0, 
-    "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": 1634231914700, 
-    "bestDetectionTimestamp": 1634231914700, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, 
+    "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": ts - 1000, 
+    "bestDetectionTimestamp": ts - 1100, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, 
     "detectionScore": 0.83, "updated": False, "links": [{"metaClass": "licensePlates", "id": "stream2-lp-40937"}]}}}}
     msgJson4 = json.dumps(message4) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson4) # exchange method
@@ -215,7 +216,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "12345678-94d3-4c21-ac5e-ce5572eb1118"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream4", "frameId": frameId, "analyticsTimestamp": 1634231915858, "metaClasses": {"licensePlates": {"stream4-lp-40974": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.98, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": 1634231912496, "bestDetectionTimestamp": 1634231915857, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream4-car-187175"}]}}, "vehicles": {}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream4", "frameId": frameId, "analyticsTimestamp": 1634231915858, "metaClasses": {"licensePlates": {"stream4-lp-40974": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.98, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": ts - 2000, "bestDetectionTimestamp": ts - 2100, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream4-car-187175"}]}}, "vehicles": {}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -223,7 +224,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "7fba8f8a-ea78-4f13-ae8d-f762265da347"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream1", "frameId": frameId, "analyticsTimestamp": 1634231916527, "metaClasses": {"licensePlates": {"stream1-lp-40790": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 1, "detectionScore": 0.48, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.97, "detectionScore": 0.48, "updated": True}}, "firstFrameTimestamp": 1634231916527, "bestDetectionTimestamp": 1634231916527, "box": {"height": 35, "width": 67, "x": 208, "y": 393}, "detectionScore": 0.48, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream1-car-185248"}]}}, "vehicles": {"stream1-car-185248": {"attributes": {"vehicleType": {"value": "toyota tundra", "attributeScore": 0.83, "detectionScore": 0.83, "updated": True}, "color": {"value": "green", "attributeScore": 1.0, "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": 1634231916527, "bestDetectionTimestamp": 1634231916527, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, "detectionScore": 0.83, "updated": False, "links": [{"metaClass": "licensePlates", "id": "stream1-lp-40790"}]}}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream1", "frameId": frameId, "analyticsTimestamp": 1634231916527, "metaClasses": {"licensePlates": {"stream1-lp-40790": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 1, "detectionScore": 0.48, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.97, "detectionScore": 0.48, "updated": True}}, "firstFrameTimestamp": ts - 3000, "bestDetectionTimestamp": ts - 3100, "box": {"height": 35, "width": 67, "x": 208, "y": 393}, "detectionScore": 0.48, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream1-car-185248"}]}}, "vehicles": {"stream1-car-185248": {"attributes": {"vehicleType": {"value": "toyota tundra", "attributeScore": 0.83, "detectionScore": 0.83, "updated": True}, "color": {"value": "green", "attributeScore": 1.0, "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": ts - 3000, "bestDetectionTimestamp": ts - 3100, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, "detectionScore": 0.83, "updated": False, "links": [{"metaClass": "licensePlates", "id": "stream1-lp-40790"}]}}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -231,7 +232,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "12345678-94d3-4c21-ac5e-ce5572eb1118"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream2", "frameId": frameId, "analyticsTimestamp": 1634231917808, "metaClasses": {"licensePlates": {"stream2-lp-40937": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.92, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": 1634231914700, "bestDetectionTimestamp": 1634231917807, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream2-car-186331"}]}}, "vehicles": {}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream2", "frameId": frameId, "analyticsTimestamp": 1634231917808, "metaClasses": {"licensePlates": {"stream2-lp-40937": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.92, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": ts - 4000, "bestDetectionTimestamp": ts - 4100, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream2-car-186331"}]}}, "vehicles": {}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -239,7 +240,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "7fba8f8a-ea78-4f13-ae8d-f762265da347"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream1", "frameId": frameId, "analyticsTimestamp": 1634231919158, "metaClasses": {"licensePlates": {"stream1-lp-40790": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.98, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": 1634231916527, "bestDetectionTimestamp": 1634231919157, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream1-car-185248"}]}}, "vehicles": {}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream1", "frameId": frameId, "analyticsTimestamp": 1634231919158, "metaClasses": {"licensePlates": {"stream1-lp-40790": {"attributes": {"lpString": {"value": "KKU3361", "attributeScore": 2, "detectionScore": 0.71, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.98, "detectionScore": 0.71, "updated": False}}, "firstFrameTimestamp": ts - 5000, "bestDetectionTimestamp": ts - 5100, "box": {"height": 36, "width": 67, "x": 246, "y": 364}, "detectionScore": 0.71, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream1-car-185248"}]}}, "vehicles": {}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -247,7 +248,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "12345678-94d3-4c21-ac5e-ce5572eb1118"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream2", "frameId": frameId, "analyticsTimestamp": 1634231919488, "metaClasses": {"licensePlates": {"stream2-lp-40937": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 6, "detectionScore": 0.87, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.95, "detectionScore": 0.87, "updated": False}}, "firstFrameTimestamp": 1634231914700, "bestDetectionTimestamp": 1634231919488, "box": {"height": 44, "width": 89, "x": 162, "y": 466}, "detectionScore": 0.87, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream2-car-186331"}]}}, "vehicles": {}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream2", "frameId": frameId, "analyticsTimestamp": 1634231919488, "metaClasses": {"licensePlates": {"stream2-lp-40937": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 6, "detectionScore": 0.87, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.95, "detectionScore": 0.87, "updated": False}}, "firstFrameTimestamp": ts - 6000, "bestDetectionTimestamp": ts - 6100, "box": {"height": 44, "width": 89, "x": 162, "y": 466}, "detectionScore": 0.87, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream2-car-186331"}]}}, "vehicles": {}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -255,7 +256,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "7fba8f8a-ea78-4f13-ae8d-f762265da347"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream4", "frameId": frameId, "analyticsTimestamp": 1634231919905, "metaClasses": {"licensePlates": {"stream4-lp-40974": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 8, "detectionScore": 0.95, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.99, "detectionScore": 0.95, "updated": False}}, "firstFrameTimestamp": 1634231912496, "bestDetectionTimestamp": 1634231919904, "box": {"height": 49, "width": 92, "x": 99, "y": 465}, "detectionScore": 0.95, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream4-car-187175"}]}}, "vehicles": {}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream4", "frameId": frameId, "analyticsTimestamp": 1634231919905, "metaClasses": {"licensePlates": {"stream4-lp-40974": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 8, "detectionScore": 0.95, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.99, "detectionScore": 0.95, "updated": False}}, "firstFrameTimestamp": ts - 7000, "bestDetectionTimestamp": ts - 7100, "box": {"height": 49, "width": 92, "x": 99, "y": 465}, "detectionScore": 0.95, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream4-car-187175"}]}}, "vehicles": {}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
@@ -263,7 +264,7 @@ while True:
     time.sleep(interMsgTimeout)
 
     frameId = "12345678-94d3-4c21-ac5e-ce5572eb1118"
-    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream0", "frameId": frameId, "analyticsTimestamp": 1634231920229, "metaClasses": {"licensePlates": {"stream0-lp-40554": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 1, "detectionScore": 0.49, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.21, "detectionScore": 0.49, "updated": True}}, "firstFrameTimestamp": 1634231920229, "bestDetectionTimestamp": 1634231920229, "box": {"height": 35, "width": 67, "x": 208, "y": 393}, "detectionScore": 0.49, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream0-car-184397"}]}}, "vehicles": {"stream0-car-184397": {"attributes": {"vehicleType": {"value": "toyota tundra", "attributeScore": 0.83, "detectionScore": 0.83, "updated": True}, "color": {"value": "green", "attributeScore": 1.0, "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": 1634231920229, "bestDetectionTimestamp": 1634231920229, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, "detectionScore": 0.83, "updated": False, "links": [{"metaClass": "licensePlates", "id": "stream0-lp-40554"}]}}}}
+    message5 = {"apiVersion": {"major": 1, "minor": 0}, "sourceId": "stream0", "frameId": frameId, "analyticsTimestamp": 1634231920229, "metaClasses": {"licensePlates": {"stream0-lp-40554": {"attributes": {"lpString": {"value": "KKU3381", "attributeScore": 1, "detectionScore": 0.49, "updated": True}, "lpRegion": {"value": "NewYork", "attributeScore": 0.21, "detectionScore": 0.49, "updated": True}}, "firstFrameTimestamp": ts - 8000, "bestDetectionTimestamp": ts - 8100, "box": {"height": 35, "width": 67, "x": 208, "y": 393}, "detectionScore": 0.49, "updated": False, "links": [{"metaClass": "vehicles", "id": "stream0-car-184397"}]}}, "vehicles": {"stream0-car-184397": {"attributes": {"vehicleType": {"value": "toyota tundra", "attributeScore": 0.83, "detectionScore": 0.83, "updated": True}, "color": {"value": "green", "attributeScore": 1.0, "detectionScore": 0.83, "updated": True}}, "firstFrameTimestamp": ts - 8000, "bestDetectionTimestamp": ts - 8100, "box": {"height": 360, "width": 532, "x": 37, "y": 181}, "detectionScore": 0.83, "updated": False, "links": [{"metaClass": "licensePlates", "id": "stream0-lp-40554"}]}}}}
     msgJson5 = json.dumps(message5) # convert to json
     message_promise = producer.basic_publish(exchange='alprdemo_exc', routing_key='', body=msgJson5) # exchange method
     producer.wait(message_promise)
