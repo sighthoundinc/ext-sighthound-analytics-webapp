@@ -66,6 +66,10 @@ that are linked together:
         srcId: string     // id of the camera source
         timeIn: number    // in ms; time since epoch of when this detection arrived via websocket
         frameId: string   // id of the frame; points to the image
+        lpValueConf: number  // confidence of the license plate string
+        lpRegionConf: number // confidence of the license plate region
+        mmConf: number       // confidence of the make/model values
+        colorConf: number    // confidence of the car color
 */
 let emptying = false;        // flag indicating we're emptying the que, so don't re-enter que emptying fn
 let userControl = false;     // flag indicating the user controls which car is displayed on top part
@@ -118,7 +122,7 @@ function App() {
         }
         initializeStomp(window.location.hostname);
 
-        const handle = window.setInterval(() => { void checkQueue() }, 200); // check queue periodically
+        const handle = window.setInterval(() => { void checkQueue() }, 100); // check queue periodically
         return () => { window.clearInterval(handle); }                       // this runs on unmount and clears the timer
     }, []);
 
@@ -177,6 +181,8 @@ function App() {
                     car.lpValue1 = lp.lpValue1;
                     car.lpValue2 = lp.lpValue2;
                     car.boxLp = lp.boxLp;
+                    car.lpValueConf = lp.lpValueConf;
+                    car.lpRegionConf = lp.lpRegionConf;
                     break;
                 }
             }
@@ -184,6 +190,11 @@ function App() {
         }
 
         return outputArray;
+    }
+
+    // Compare timestamps; used by sort function.
+    function compareFn(a, b) {
+        return b.bestTS - a.bestTS;
     }
 
     // Sometimes the detections give us 3 cars in a row that are the same car, but have
@@ -203,6 +214,11 @@ function App() {
             }
         }
 
+        // Due to async processing, some items will appear out of order, plus we want the most recent
+        // first, so reverse the array and then sort it. The sort is faster if the array is almost
+        // in the right order to start with.
+        uniques.reverse();
+        uniques.sort(compareFn);
         return uniques;
     }
 
@@ -237,7 +253,9 @@ function App() {
             links: car.links,
             srcId,
             timeIn,
-            frameId
+            frameId,
+            mmConf: car.attributes.vehicleType?.detectionScore,
+            colorConf: car.attributes.color?.detectionScore,
         }
         // console.log("----- Got car, id=", carId, " mm=", car.attributes.vehicleType?.value);
         localDetections.push(entry);
@@ -259,7 +277,9 @@ function App() {
             links: lp.links,
             srcId,
             timeIn,
-            frameId
+            frameId,
+            lpValueConf: lp.attributes.lpString?.detectionScore,
+            lpRegionConf: lp.attributes.lpRegion?.detectionScore,
         }
         // console.log("----- Got license plate, id=", lpId, " value=", lp.attributes.lpString?.value);
         localDetections.push(entry);
@@ -366,6 +386,8 @@ function App() {
                         det.carValue1 = oneDetection.carValue1;
                         det.carValue2 = oneDetection.carValue2;
                         det.imageData = imageData;
+                        det.mmConf = oneDetection.mmConf;
+                        det.colorConf = oneDetection.colorConf;
                         det.lpId = findLink(oneDetection.links, "licensePlates");
                         // console.log("----- Updated car=", det.carId, " mm=", det.carValue1, " for LP=", det.lpId, " cbox=", det.boxCar);
                     }
@@ -385,6 +407,8 @@ function App() {
                         det.lpValue1 = oneDetection.lpValue1;
                         det.lpValue2 = oneDetection.lpValue2;
                         det.imageData = imageData;
+                        det.lpValueConf = oneDetection.lpValueConf;
+                        det.lpRegionConf = oneDetection.lpRegionConf;
                         det.carId = findLink(oneDetection.links, "vehicles");
                         // console.log("----- Updated LP=", det.lpId, " value=", det.lpValue1, " for carId=", det.carId, " lpbox=", det.boxLp);
                     }
@@ -518,6 +542,7 @@ function App() {
     let showRegion = false;
     let attributeString = "";
     let regionString = "";
+    let lpConfString = "";
 
     // Set box dimensions in case we don't have any.
     if (sd) {
@@ -539,13 +564,21 @@ function App() {
 
     if (sd?.type === "car" && sd?.carValue1) {
         showAttributes = true;
-        attributeString = `${sd.carValue1}`;
+        attributeString = `${sd.carValue1} (confidence: ${sd.mmConf})`;
         if (sd?.carValue2) {
-            attributeString += `, color: ${sd.carValue2}`;
+            attributeString += `, color: ${sd.carValue2} (confidence: ${sd.colorConf})`;
+        }
+        if (sd?.lpValue1 && sd?.lpValueConf) {
+            lpConfString = `(Plate confidence: ${sd.lpValueConf}`
         }
         if (sd?.lpValue2) {
             showRegion = true;
             regionString = `${sd.lpValue2}`;
+            if (sd.lpRegionConf) {
+                lpConfString += `, region confidence: ${sd.lpRegionConf})`
+            }
+        } else {
+            lpConfString += `)`
         }
     }
 
@@ -642,7 +675,7 @@ function App() {
                         </div>
                         { carDetections.length > 0 &&
                             <div style={{
-                                width: 480,
+                                width: 520,
                                 marginLeft: "auto",
                                 marginRight: "auto",
                                 backgroundColor: "aliceblue",
@@ -670,17 +703,19 @@ function App() {
                                     />
                                 </div>
                                 <div className="selectedText">
-                                    <h1 style={{textAlign: "center", marginTop: 5}}>{sd.lpValue1}</h1>
+                                    <h1 style={{textAlign: "center", marginTop: 2}}>{sd.lpValue1}</h1>
                                     { showRegion &&
                                         <p style={{marginBottom: 15, marginTop: -15}}>{regionString}</p>
                                     }
                                     <p>{`${moment(sd.bestTS).format("YYYY-MM-DD HH:mm:ss")}`}</p>
+                                    { showRegion &&
+                                        <p style={{marginBottom: 15}}>{lpConfString}</p>
+                                    }
                                     { showAttributes && 
                                         <p>{attributeString}</p>
                                     }
                                     <p>{`(Time Captured: ${moment(sd.firstTS).format("YYYY-MM-DD HH:mm:ss.SSS")})`}</p>
-                                    <p>{`(Time Displayed: ${moment(sd.timeIn).format("YYYY-MM-DD HH:mm:ss.SSS")})`}</p>
-                                    <p>{`(lag: ${lag} ms)`}</p>
+                                    <p>{`(Time Displayed: ${moment(sd.timeIn).format("YYYY-MM-DD HH:mm:ss.SSS")}, lag: ${lag} ms)`}</p>
                                 </div>
                             </div>
                         }

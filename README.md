@@ -30,3 +30,11 @@ To build this UI into a docker image, run:
 $ ./buildDocker.sh
 ```
 Follow the instructions to tag your local image, or customize the [runDocker.sh](runDocker.sh) script accordingly.
+
+## Ports
+
+These ports are used and need to stay open:  
+* 80 - Used by the web UI application
+* 4000 - used by the UI to access images on the media server  
+* 5672 - used by RabbitMQ for its AMQP traffic  
+* 15674 - used by RabbitMQ to send AMQP traffic to the UI
