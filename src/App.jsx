@@ -48,24 +48,26 @@ Format of car and LP data we will keep (from all json data rcvd);
 this will be combined car/lp/person data for those cars, license plates and people
 that are linked together:
     'detections' format:
-        carId: string     // fill in when process links
+        carId: string        // fill in when process links
         lpId: string
         personId: string
-        imageData: string // url of image data
-        bestTS: number    // in ms; will be bestTS of object found
-        firstTS: number   // in ms; will be firstTS of object found
+        carImageData: string // url of image data for a car
+        lpImageData: string  // url of image data for a license plate
+        imageData: string    // url of image data for a person
+        bestTS: number       // in ms; will be bestTS of object found
+        firstTS: number      // in ms; will be firstTS of object found
         boxCar: { height: number, width: number, x: number, y: number }
         boxLp: { height: number, width: number, x: number, y: number }
         boxPerson: { height: number, width: number, x: number, y: number }
-        carValue1: string // make/model
-        carValue2: string // color
-        lpValue1: string  // string
-        lpValue2: string  // region
-        type: string      // 'car' or 'lp' or 'person'
-        links: array      // array of objects to correlate car <--> lp
-        srcId: string     // id of the camera source
-        timeIn: number    // in ms; time since epoch of when this detection arrived via websocket
-        frameId: string   // id of the frame; points to the image
+        carValue1: string    // make/model
+        carValue2: string    // color
+        lpValue1: string     // string
+        lpValue2: string     // region
+        type: string         // 'car' or 'lp' or 'person'
+        links: array         // array of objects to correlate car <--> lp
+        srcId: string        // id of the camera source
+        timeIn: number       // in ms; time since epoch of when this detection arrived via websocket
+        frameId: string      // id of the frame; points to the image, used for persons
         lpValueConf: number  // confidence of the license plate string
         lpRegionConf: number // confidence of the license plate region
         mmConf: number       // confidence of the make/model values
@@ -183,6 +185,7 @@ function App() {
                     car.boxLp = lp.boxLp;
                     car.lpValueConf = lp.lpValueConf;
                     car.lpRegionConf = lp.lpRegionConf;
+                    car.lpImageData = lp.lpImageData;
                     break;
                 }
             }
@@ -242,7 +245,8 @@ function App() {
             type: "car",
             carId,
             lpId,
-            imageData,                                   // jpg image
+            carImageData: imageData,                     // jpg image
+            lpImageData: imageData,                      // jpg image
             bestTS: car.bestDetectionTimestamp,          // in ms
             firstTS: car.firstFrameTimestamp,            // in ms
             boxCar: car.box,
@@ -268,7 +272,8 @@ function App() {
             type: "lp",
             carId,
             lpId,
-            imageData,                              // jpg image
+            lpImageData: imageData,                 // jpg image
+            carImageData: imageData,                // jpg image
             bestTS: lp.bestDetectionTimestamp,      // in ms
             firstTS: lp.firstFrameTimestamp,        // in ms
             boxLp: lp.box,
@@ -379,13 +384,12 @@ function App() {
                 const results = carDetections.filter(det =>
                     det.carId === oneDetection.carId && oneDetection.srcId === det.srcId);
                 if (results.length) { // found matching car
-                    // console.log("----- Updating car - results=", results.length);
                     for (const det of results) {
                         det.bestTS = oneDetection.bestTS;
                         det.boxCar = oneDetection.boxCar;
                         det.carValue1 = oneDetection.carValue1;
                         det.carValue2 = oneDetection.carValue2;
-                        det.imageData = imageData;
+                        det.carImageData = imageData;
                         det.mmConf = oneDetection.mmConf;
                         det.colorConf = oneDetection.colorConf;
                         det.lpId = findLink(oneDetection.links, "licensePlates");
@@ -400,13 +404,12 @@ function App() {
                 const results = lpDetections.filter(det =>
                     det.lpId === oneDetection.lpId && oneDetection.srcId === det.srcId);
                 if (results.length) { // found matching lp
-                    // console.log("----- Updating LP - results=", results.length);
                     for (const det of results) {
                         det.bestTS = oneDetection.bestTS;
                         det.boxLp = oneDetection.boxLp;
                         det.lpValue1 = oneDetection.lpValue1;
                         det.lpValue2 = oneDetection.lpValue2;
-                        det.imageData = imageData;
+                        det.lpImageData = imageData;
                         det.lpValueConf = oneDetection.lpValueConf;
                         det.lpRegionConf = oneDetection.lpRegionConf;
                         det.carId = findLink(oneDetection.links, "vehicles");
@@ -414,7 +417,6 @@ function App() {
                     }
                 } else {
                     setLpDetections([oneDetection, ...lpDetections]); // add this new lp detection to array
-                    // console.log("----- Pushing new detection");
                     newItems.push(oneDetection); // not found above, make new entry
                 }
             } else if (oneDetection.type === "person" ) {
@@ -665,7 +667,7 @@ function App() {
                                 { sd.type !== "lp" &&
                                     <div style={{maxHeight: canvasH}}>
                                         <img
-                                            src={sd.imageData}
+                                            src={sd.carImageData}
                                             alt={sd.lpValue1}
                                             height={canvasH}
                                         />
@@ -688,7 +690,7 @@ function App() {
                                 }}>
                                     <CroppedImage
                                         type={"lp"}
-                                        src={sd.imageData}
+                                        src={sd.lpImageData}
                                         alt={sd.lpValue1}
                                         region={{
                                             x: sd.boxLp.x,

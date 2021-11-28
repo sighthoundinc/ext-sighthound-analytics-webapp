@@ -20,7 +20,7 @@ function ImageGrid({detections, selectDetection}){
                                     ? "gridImage selectedGridImage"
                                     : `gridImage ${detection === selectedDetection && "selectedGridImage"}`
                                 } 
-                                src={detection.imageData} 
+                                src={detection.carImageData} 
                                 alt={detection.lpValue1} 
                                 key={`IMG_${index}`} 
                                 onClick={() => handleClick(detection)} 

@@ -121,6 +121,7 @@ nav input:hover, nav label:hover, nav button:hover {
   height: 345px;
   overflow: scroll;
   background-color: #fff;
+  padding-top: 5px;
 }
 
 .imageGrid p {
